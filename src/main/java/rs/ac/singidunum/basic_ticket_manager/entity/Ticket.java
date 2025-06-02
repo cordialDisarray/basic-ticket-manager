@@ -23,8 +23,8 @@ public class Ticket {
     private int ticketId;
 
     @ManyToOne
-    @Column(name = "user_id")
-    private int assignedTo;
+    @JoinColumn(name = "user_id")
+    private User assignedTo;
 
     @Column(nullable = false)
     private String title;
