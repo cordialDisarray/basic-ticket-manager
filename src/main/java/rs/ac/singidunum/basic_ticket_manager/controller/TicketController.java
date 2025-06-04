@@ -1,22 +1,44 @@
 package rs.ac.singidunum.basic_ticket_manager.controller;
 
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import rs.ac.singidunum.basic_ticket_manager.entity.Ticket;
-import rs.ac.singidunum.basic_ticket_manager.repository.TicketRepository;
+import rs.ac.singidunum.basic_ticket_manager.service.TicketService;
 
 import java.util.List;
 
 @RestController
 @AllArgsConstructor
+@RequestMapping("/api/tickets")
 public class TicketController {
-    private final TicketRepository ticketRepository;
+    private final TicketService ticketService;
 
-
-    @GetMapping("/tickets")
-    public List<Ticket> getAllTickets(){
-        return ticketRepository.findAll();
+    @GetMapping
+    public List<Ticket> getAllTickets() {
+        return ticketService.getAllTickets();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Ticket> getTicketById(@PathVariable int id) {
+        return ResponseEntity.ok(ticketService.getTicketById(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<Ticket> createTicket(@RequestBody Ticket ticket) {
+        return ResponseEntity.ok(ticketService.createTicket(ticket));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Ticket> updateTicket(@PathVariable int id, @RequestBody Ticket ticket) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.updateTicket(id, ticket));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTicket(@PathVariable int id) {
+        ticketService.deleteTicket(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

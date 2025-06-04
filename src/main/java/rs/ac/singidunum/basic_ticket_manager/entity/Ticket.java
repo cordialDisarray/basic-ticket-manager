@@ -8,6 +8,7 @@ import lombok.Setter;
 import rs.ac.singidunum.basic_ticket_manager.enums.Priority;
 import rs.ac.singidunum.basic_ticket_manager.enums.Status;
 import rs.ac.singidunum.basic_ticket_manager.enums.Type;
+
 import java.time.LocalDate;
 
 @Entity
