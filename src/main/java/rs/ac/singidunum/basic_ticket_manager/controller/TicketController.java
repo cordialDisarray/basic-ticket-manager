@@ -8,6 +8,7 @@ import rs.ac.singidunum.basic_ticket_manager.entity.Ticket;
 import rs.ac.singidunum.basic_ticket_manager.service.TicketService;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @AllArgsConstructor
@@ -16,8 +17,14 @@ public class TicketController {
     private final TicketService ticketService;
 
     @GetMapping
-    public List<Ticket> getAllTickets() {
-        return ticketService.getAllTickets();
+    public List<Ticket> getAllTickets(@RequestParam(required = false, defaultValue = "") String sortBy,
+                                      @RequestParam(required = false, defaultValue = "") String order) {
+
+        if (!Set.of("assignedTo", "title", "status", "type", "priority", "createdAt", "deadline").contains(sortBy))
+            sortBy = "ticketId";
+
+        order = order.equalsIgnoreCase("desc") ? "desc" : "asc";
+        return ticketService.getAllTickets(sortBy, order);
     }
 
     @GetMapping("/{id}")

@@ -1,6 +1,7 @@
 package rs.ac.singidunum.basic_ticket_manager.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,8 +20,8 @@ public class UserServiceImpl implements UserService {
     private final TicketRepository ticketRepository;
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<User> getAllUsers(Sort sort) {
+        return userRepository.findAll(sort);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
         List<Ticket> assignedTickets = ticketRepository.findByAssignedTo(user);
 
-        for (Ticket ticket : assignedTickets){
+        for (Ticket ticket : assignedTickets) {
             ticket.setAssignedTo(null);
         }
 

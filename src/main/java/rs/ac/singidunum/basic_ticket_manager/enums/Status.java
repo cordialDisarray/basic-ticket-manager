@@ -5,5 +5,6 @@ public enum Status {
     IN_PROGRESS,
     REVIEW,
     DONE,
-    BLOCKED
+    BLOCKED,
+    CANCELLED
 }

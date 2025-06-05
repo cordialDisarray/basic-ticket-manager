@@ -5,7 +5,7 @@ import rs.ac.singidunum.basic_ticket_manager.entity.Ticket;
 import java.util.List;
 
 public interface TicketService {
-    List<Ticket> getAllTickets();
+    List<Ticket> getAllTickets(String sortBy, String order);
 
     Ticket getTicketById(int id);
 

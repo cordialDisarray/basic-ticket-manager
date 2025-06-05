@@ -1,6 +1,7 @@
 package rs.ac.singidunum.basic_ticket_manager.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,8 +18,18 @@ public class TicketServiceImpl implements TicketService {
     private final TicketRepository ticketRepository;
 
     @Override
-    public List<Ticket> getAllTickets() {
-        return ticketRepository.findAll();
+    public List<Ticket> getAllTickets(String sortBy, String order) {
+
+        return switch (sortBy) {
+            case "priority" -> ticketRepository.findAllSortByPriority(order);
+            case "status" -> ticketRepository.findAllSortByStatus(order);
+            case "type" -> ticketRepository.findAllSortByType(order);
+            case "title", "createdAt", "deadline" -> {
+                Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+                yield ticketRepository.findAll(Sort.by(direction, sortBy));
+            }
+            default -> ticketRepository.findAll();
+        };
     }
 
     @Override
