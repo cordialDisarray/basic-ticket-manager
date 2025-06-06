@@ -1,12 +1,13 @@
 package rs.ac.singidunum.basic_ticket_manager.controller;
 
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import rs.ac.singidunum.basic_ticket_manager.entity.Ticket;
 import rs.ac.singidunum.basic_ticket_manager.service.TicketService;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
@@ -34,12 +35,19 @@ public class TicketController {
 
     @PostMapping
     public ResponseEntity<Ticket> createTicket(@RequestBody Ticket ticket) {
-        return ResponseEntity.ok(ticketService.createTicket(ticket));
+        Ticket createdTicket = ticketService.createTicket(ticket);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdTicket.getTicketId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(createdTicket);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Ticket> updateTicket(@PathVariable int id, @RequestBody Ticket ticket) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.updateTicket(id, ticket));
+        return ResponseEntity.ok(ticketService.updateTicket(id, ticket));
     }
 
     @DeleteMapping("/{id}")
