@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(int id, User updatedUser) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
         user.setEmail(updatedUser.getEmail());
         user.setPosition(updatedUser.getPosition());
@@ -53,13 +53,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
         List<Ticket> assignedTickets = ticketRepository.findByAssignedTo(user);
-
         for (Ticket ticket : assignedTickets) {
             ticket.setAssignedTo(null);
         }
 
         ticketRepository.saveAll(assignedTickets);
-
         userRepository.delete(user);
     }
 }

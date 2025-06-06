@@ -43,7 +43,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Integer> {
                         WHEN 'DONE' THEN 1
                         WHEN 'REVIEW' THEN 2
                         WHEN 'IN_PROGRESS' THEN 3
-                        WHEN 'TO-DO' THEN 4
+                        WHEN 'TO_DO' THEN 4
                         WHEN 'BLOCKED' THEN 5
                         WHEN 'CANCELLED' THEN 6
                     END

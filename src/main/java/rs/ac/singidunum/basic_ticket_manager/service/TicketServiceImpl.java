@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import rs.ac.singidunum.basic_ticket_manager.entity.Ticket;
+import rs.ac.singidunum.basic_ticket_manager.entity.User;
 import rs.ac.singidunum.basic_ticket_manager.repository.TicketRepository;
+import rs.ac.singidunum.basic_ticket_manager.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<Ticket> getAllTickets(String sortBy, String order) {
@@ -49,7 +52,15 @@ public class TicketServiceImpl implements TicketService {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found."));
 
-        ticket.setAssignedTo(updatedTicket.getAssignedTo());
+        if (updatedTicket.getAssignedTo() != null) {
+            int userId = updatedTicket.getAssignedTo().getUserId();
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+            ticket.setAssignedTo(user);
+        } else {
+            ticket.setAssignedTo(null);
+        }
+
         ticket.setDeadline(updatedTicket.getDeadline());
         ticket.setStatus(updatedTicket.getStatus());
         ticket.setType(updatedTicket.getType());
