@@ -6,6 +6,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import rs.ac.singidunum.basic_ticket_manager.entity.Ticket;
 import rs.ac.singidunum.basic_ticket_manager.entity.User;
+import rs.ac.singidunum.basic_ticket_manager.enums.Priority;
+import rs.ac.singidunum.basic_ticket_manager.enums.Status;
+import rs.ac.singidunum.basic_ticket_manager.enums.Type;
+import rs.ac.singidunum.basic_ticket_manager.projection.TicketPriorityCount;
+import rs.ac.singidunum.basic_ticket_manager.projection.TicketStatusCount;
 
 import java.util.List;
 
@@ -13,6 +18,20 @@ import java.util.List;
 public interface TicketRepository extends JpaRepository<Ticket, Integer> {
 
     List<Ticket> findByAssignedTo(User user);
+
+    List<Ticket> findByAssignedToIsNull();
+
+    List<Ticket> findByStatus(Status status);
+
+    List<Ticket> findByType(Type type);
+
+    List<Ticket> findByPriority(Priority priority);
+
+    @Query("SELECT ticket.priority AS priority, COUNT(ticket) AS count FROM Ticket ticket GROUP BY ticket.priority")
+    List<TicketPriorityCount> countByPriority();
+
+    @Query("SELECT ticket.status AS status, COUNT(ticket) AS count FROM Ticket ticket GROUP BY ticket.status")
+    List<TicketStatusCount> countByStatus();
 
     @Query("""
             SELECT ticket FROM Ticket ticket
