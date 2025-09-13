@@ -1,7 +1,9 @@
 package rs.ac.singidunum.basic_ticket_manager.service;
 
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Sort;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,23 +30,22 @@ public class TicketServiceImpl implements TicketService {
     private final UserRepository userRepository;
 
     @Override
-    public List<Ticket> getAllTickets(String sortBy, String order) {
+    public Page<Ticket> getAllTickets(String sortBy, String order, Pageable pageable) {
+
+        boolean desc = order.equalsIgnoreCase("desc");
 
         return switch (sortBy) {
-            case "priority" -> ticketRepository.findAllSortByPriority(order);
-            case "status" -> ticketRepository.findAllSortByStatus(order);
-            case "type" -> ticketRepository.findAllSortByType(order);
-            case "title", "createdAt", "deadline" -> {
-                Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-                yield ticketRepository.findAll(Sort.by(direction, sortBy));
-            }
-            default -> ticketRepository.findAll();
+            case "priority" -> desc ?
+                    ticketRepository.findAllSortByPriorityDesc(pageable)
+                    : ticketRepository.findAllSortByPriorityAsc(pageable);
+            case "status" -> desc ?
+                    ticketRepository.findAllSortByStatusDesc(pageable)
+                    : ticketRepository.findAllSortByStatusAsc(pageable);
+            case "type" -> desc ?
+                    ticketRepository.findAllSortByTypeDesc(pageable)
+                    : ticketRepository.findAllSortByTypeAsc(pageable);
+            default -> ticketRepository.findAll(pageable);
         };
-    }
-
-    @Override
-    public List<Ticket> getAllTickets() {
-        return ticketRepository.findAll();
     }
 
     @Override
@@ -66,27 +67,27 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public List<Ticket> getTicketsByStatus(Status status) {
+    public Page<Ticket> getTicketsByStatus(Status status, Pageable pageable) {
         if (status == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status must be provided.");
         }
-        return ticketRepository.findByStatus(status);
+        return ticketRepository.findByStatus(status, pageable);
     }
 
     @Override
-    public List<Ticket> getTicketsByType(Type type) {
+    public Page<Ticket> getTicketsByType(Type type, Pageable pageable) {
         if (type == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Type must be provided.");
         }
-        return ticketRepository.findByType(type);
+        return ticketRepository.findByType(type, pageable);
     }
 
     @Override
-    public List<Ticket> getTicketsByPriority(Priority priority) {
+    public Page<Ticket> getTicketsByPriority(Priority priority, Pageable pageable) {
         if (priority == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Priority must be provided.");
         }
-        return ticketRepository.findByPriority(priority);
+        return ticketRepository.findByPriority(priority, pageable);
     }
 
     @Override
@@ -153,5 +154,21 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public void deleteTicket(int id) {
         ticketRepository.deleteById(id);
+    }
+
+    @Override
+    public Map<String, Long> getAssignedAndUnassignedTicketCount() {
+        long assigned = 0;
+        long unassigned = 0;
+
+        for (Ticket ticket : ticketRepository.findAll()) {
+            if (ticket.getAssignedTo() != null) assigned++;
+            else unassigned++;
+        }
+
+        return Map.of(
+                "assigned", assigned,
+                "unassigned", unassigned
+        );
     }
 }

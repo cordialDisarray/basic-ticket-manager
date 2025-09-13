@@ -8,10 +8,11 @@ import rs.ac.singidunum.basic_ticket_manager.enums.Type;
 import java.util.List;
 import java.util.Map;
 
-public interface TicketService {
-    List<Ticket> getAllTickets(String sortBy, String order);
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-    List<Ticket> getAllTickets();
+public interface TicketService {
+    Page<Ticket> getAllTickets(String sortBy, String order, Pageable pageable);
 
     List<Ticket> getUnassignedTickets();
 
@@ -25,13 +26,15 @@ public interface TicketService {
 
     void deleteTicket(int id);
 
-    List<Ticket> getTicketsByStatus(Status status);
+    Page<Ticket> getTicketsByStatus(Status status, Pageable pageable);
 
-    List<Ticket> getTicketsByType(Type type);
+    Page<Ticket> getTicketsByType(Type type, Pageable pageable);
 
-    List<Ticket> getTicketsByPriority(Priority priority);
+    Page<Ticket> getTicketsByPriority(Priority priority, Pageable pageable);
 
     Map<Priority, Long> getTicketCountByPriority();
 
     Map<Status, Long> getTicketCountByStatus();
+
+    Map<String, Long> getAssignedAndUnassignedTicketCount();
 }

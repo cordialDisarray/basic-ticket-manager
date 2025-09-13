@@ -1,12 +1,11 @@
 package rs.ac.singidunum.basic_ticket_manager.service;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import rs.ac.singidunum.basic_ticket_manager.entity.User;
 
-import java.util.List;
-
 public interface UserService {
-    List<User> getAllUsers(Sort sort);
+    Page<User> getAllUsers(String sortBy, String order, Pageable pageable);
 
     User getUserById(int id);
 

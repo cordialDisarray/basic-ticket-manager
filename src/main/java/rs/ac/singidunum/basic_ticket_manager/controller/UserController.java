@@ -1,13 +1,16 @@
 package rs.ac.singidunum.basic_ticket_manager.controller;
 
 import lombok.AllArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rs.ac.singidunum.basic_ticket_manager.entity.User;
 import rs.ac.singidunum.basic_ticket_manager.service.UserService;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -17,14 +20,18 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping()
-    public List<User> getAllUsers(@RequestParam(required = false, defaultValue = "") String sortBy,
-                                  @RequestParam(required = false, defaultValue = "") String order) {
+    public Page<User> getAllUsers(@RequestParam(required = false, defaultValue = "") String sortBy,
+                                  @RequestParam(required = false, defaultValue = "") String order,
+                                  @RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = "5") int size) {
 
         if (!Set.of("position", "fullName", "email").contains(sortBy))
             sortBy = "userId";
 
-        Sort sort = Sort.by(order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
-        return userService.getAllUsers(sort);
+        Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        return userService.getAllUsers(sortBy, order, pageable);
     }
 
     @GetMapping("/{id}")

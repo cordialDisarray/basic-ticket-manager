@@ -6,5 +6,4 @@ import rs.ac.singidunum.basic_ticket_manager.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
-
 }
