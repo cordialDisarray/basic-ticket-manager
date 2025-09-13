@@ -1,0 +1,73 @@
+<div class="d-flex flex-column flex-md-row">
+    <div class="col p-0 section-column-left flex-grow-1" style="flex-basis: 46%;">
+
+        <div class="d-flex mb-3" id="create-ticket">
+            <div id="inner-create-ticket">
+                <h3>Create a ticket?</h3>
+                <button id="create-ticket-btn" class="btn btn-primary ms-3">
+                    <i class="fa-solid fa-square-plus"></i>
+                    <span>Create</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="card border-0 rounded-4">
+            <h2>Ticket overview</h2>
+
+            <span class="section-title">Priority</span>
+            <div class="section">
+                <div class="priorities">
+                    <div class="priority">
+                        <span class="value critical" id="critical-count"></span>
+                        <span style="color:#B286D0;" class="priority-label">Critical</span>
+                    </div>
+                    <div class="priority">
+                        <span class="value high" id="high-count"></span>
+                        <span style="color:#FF89AE;" class="priority-label">High</span>
+                    </div>
+                    <div class="priority">
+                        <span class="value medium" id="medium-count"></span>
+                        <span style="color:#FDAD8A;" class="priority-label">Medium</span>
+                    </div>
+                    <div class="priority">
+                        <span class="value low" id="low-count"></span>
+                        <span style="color:#67BB9C;" class="priority-label">Low</span>
+                    </div>
+                </div>
+            </div>
+
+            <span class="section-title">Status</span>
+            <div class="section" id="status-section">
+                <canvas id="status-chart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-column-right col p-0 d-flex flex-column align-items-center flex-grow-2" style="flex-basis: 54%;">
+
+        <div class="card border-0 rounded-4" id="user-overview">
+            <h2>User overview</h2>
+
+            <span class="section-title">Assigned tickets</span>
+            <div class="section" id="user-list-section">
+                <ul class="list-group">
+                </ul>
+            </div>
+        </div>
+
+        <div id="assignment-section">
+            <div id="inner-assignment-section" class="d-flex align-items-center justify-content-center">
+                <div id="assignment-chart-wrapper">
+                    <canvas id="assignment-chart" width="200" height="600"></canvas>
+                </div>
+                <div id="assignment-question">
+                    <p>Out of <span id="all-tickets-count"></span> tickets <span id="unassigned-tickets-count"></span>.</p>
+                    <div class="assign-row d-flex align-items-center justify-content-center gap-2">
+                        <p class="mb-0" style="white-space: nowrap;" id="assignment-question-text">Assign a ticket?</p>
+                        <button id="assign-ticket-btn" class="btn btn-secondary mt-2">Assign</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
