@@ -446,28 +446,6 @@ body {
 
 /*___________________________________________ USERS PAGE ___________________________________________*/
 
-.controls label {
-    font-size: 0.9rem;
-}
-
-.controls .form-select-sm {
-    padding: 0.25rem 1.5rem 0.25rem 0.5rem;
-    font-size: 0.85rem;
-}
-
-#sort-order-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.section .badge {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
-    display: inline-block;
-    margin-bottom: 0.2rem;
-}
-
 .card.junior h2 {
     background-color: #B8D9EE;
 }
@@ -490,7 +468,7 @@ body {
     width: 400px;
 }
 
-.card.junior #position-color {
+.card.junior p {
     color: #B8D9EE;
 }
 
@@ -505,8 +483,6 @@ body {
 .card.team_lead p {
     color: #EEB2CB;
 }
-
-/*___________________________________________ EDIT USER PAGE ___________________________________________*/
 
 .sorting {
     display: flex;
@@ -545,9 +521,7 @@ body {
     gap: 0.5rem;
 }
 
-#create-ticket-btn {
-    align-self: center;
-}
+/*___________________________________________ EDIT USER PAGE ___________________________________________*/
 
 .input-blend {
     border: none;
@@ -575,4 +549,76 @@ body {
 
 select option {
     padding-left: 10px;
+}
+
+
+.critical h2 {
+    background: #B286D0;
+}
+
+.high h2 {
+    background: #FF89AE;
+}
+
+.medium h2 {
+    background: #fbb699;
+}
+
+.low h2 {
+    background: #72c9a9;
+}
+
+
+.card.critical p strong {
+    color: #B286D0;
+}
+
+.card.high p strong {
+    color: #FF89AE;
+}
+
+.card.medium p strong {
+    color: #fbb699;
+}
+
+.card.low p strong {
+    color: #72c9a9;
+}
+
+
+.btn.status-label {
+    background-color: #d6d6db;
+    color: #85878b;
+    margin: 0.3em;
+    border-radius: 0.8em;
+    font-size: 0.9em;
+    border: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.1s ease;
+}
+
+#TO_DO:checked+label[for="TO_DO"] {
+    background-color: #749BCF;
+    color: white;
+}
+
+#IN_PROGRESS:checked+label[for="IN_PROGRESS"] {
+    background-color: #4FC1CD;
+    color: white;
+}
+
+#medium:checked+label[for="medium"] {
+    background-color: #f3d196;
+    color: white;
+}
+
+#BLOCKED:checked+label[for="BLOCKED"] {
+    background-color: #f4A8BD;
+    color: white;
+}
+
+#CANCELLED:checked+label[for="CANCELLED"] {
+    background-color: #939aa0;
+    color: white;
 }

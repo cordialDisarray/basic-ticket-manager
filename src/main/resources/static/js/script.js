@@ -276,6 +276,7 @@ function initUsersPage() {
   const prevBtn = document.getElementById("prevPage");
   const nextBtn = document.getElementById("nextPage");
   const pageInfo = document.getElementById("pageInfo");
+  const createUserBtn = document.getElementById("create-ticket-btn");
 
   let currentSortBy = "fullName";
   let currentOrder = "asc";
@@ -285,109 +286,129 @@ function initUsersPage() {
   let ticketsData = [];
 
   const priorities = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
-  const weights = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
   const colors = { CRITICAL: "critical", HIGH: "high", MEDIUM: "medium", LOW: "low" };
 
+  const defaultStats = () => Object.fromEntries(priorities.map(p => [p, 0]));
+
   axios.get("/api/tickets?page=0&size=50")
-    .then(res => {
-      ticketsData = res.data.content;
+    .then(response => {
+      ticketsData = response.data.content;
       fetchUsers();
     })
-    .catch(err => console.error("Error fetching tickets:", err));
+    .catch(error => console.error("Error fetching tickets:", error));
+
+  function calculateUserStats() {
+    const stats = {};
+    for (const ticket of ticketsData) {
+      const name = ticket.assignedTo?.fullName;
+      const priority = ticket.priority;
+
+      if (!name || !priorities.includes(priority)) continue;
+
+      if (!stats[name]) {
+        stats[name] = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+      }
+
+      stats[name][priority]++;
+    }
+    return stats;
+  }
+
+  function renderUserCard(user, stats) {
+    const card = document.createElement("div");
+    card.classList.add("col-md-4");
+
+    card.innerHTML =
+      `<div class="card border-0 rounded-5 ${user.position.toLowerCase()}"> 
+      <h2></h2> 
+
+      <div class="d-flex justify-content-center align-items-center flex-column position-relative" style="color: #557089ff;">
+        <i class="fa-solid fa-user fa-2x"></i> <h5 class="mt-2 mb-0">${user.fullName}</h5>
+        <p id="position-color"><strong>⬤ ${user.position.replace("_", " ")}</strong></p>
+
+        <i class="fa-solid fa-pencil position-absolute" style="top: 0; right: 0; transform: translateY(30%); cursor: pointer; color: #7a96b1ff;" title="Edit"></i>
+        <i class="fa-solid fa-user-minus position-absolute" style="top: 0; left: 0; transform: translateY(30%); cursor: pointer; color: #7a96b1ff;" title="Delete"></i>
+      </div>
+
+      <span class="section-title">Email</span>
+
+      <div class="section">
+        <p style="margin-bottom: 0px; color: #748ba1ff">${user.email}</p>
+      </div>
+
+      <span class="section-title">Tickets</span>
+
+      <div class="section" style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap">
+        ${priorities.map(p => `<span class="badge rounded-pill ${colors[p]}">${stats[p]}</span>`).join("")} 
+      </div>
+    </div> `;
+
+    card.querySelector(".fa-pencil").addEventListener("click", () => {
+      window.currentEditingUserId = user.userId;
+      loadPage("editUser");
+    });
+
+    card.querySelector(".fa-user-minus").addEventListener("click", () => {
+      if (confirm(`Delete ${user.fullName}? Tickets will be unassigned.`)) {
+        axios.delete(`/api/users/${user.userId}`)
+          .then(() => {
+            alert(`User ${user.fullName} deleted.`);
+            fetchUsers();
+          })
+          .catch(() => alert("Failed to delete user."));
+      }
+    });
+
+    container.appendChild(card);
+  }
 
   function fetchUsers() {
     axios.get("/api/users", {
       params: { page: currentPage, size: pageSize, sortBy: currentSortBy, order: currentOrder }
     })
-      .then(res => {
-        const users = res.data.content;
-        totalPages = res.data.totalPages;
-
-        if (!container) return;
+      .then(response => {
+        const users = response.data.content;
+        totalPages = response.data.totalPages;
         container.innerHTML = "";
-
-        const userStats = {};
-        ticketsData.forEach(ticket => {
-          if (!ticket.assignedTo) return;
-          const name = ticket.assignedTo.fullName;
-          const priority = ticket.priority;
-          if (!userStats[name]) userStats[name] = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
-          userStats[name][priority]++;
-        });
-
-        users.forEach(user => {
-          const stats = userStats[user.fullName] || { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
-          const col = document.createElement("div");
-          col.classList.add("col-md-4");
-
-          col.innerHTML = `
-          <div class="card border-0 rounded-5 ${user.position.toLowerCase()}">
-            <h2></h2>
-            <div class="d-flex justify-content-center align-items-center flex-column position-relative" style="color: #557089ff;">
-              <i class="fa-solid fa-user fa-2x"></i>
-              <h5 class="mt-2 mb-0">${user.fullName}</h5>
-              <p id="position-color"><strong>⬤ ${user.position}</strong></p>
-
-              <i class="fa-solid fa-pencil position-absolute" style="top: 0; right: 0; transform: translateY(30%); cursor: pointer; color: #7a96b1ff;" title="Edit"></i>
-              <i class="fa-solid fa-user-minus position-absolute" style="top: 0; left: 0; transform: translateY(30%); cursor: pointer; color: #7a96b1ff;" title="Delete"></i>
-            </div>
-
-            <span class="section-title">Email</span>
-            <div class="section"><p style="margin-bottom: 0px; color: #748ba1ff">${user.email}</p></div>
-
-            <span class="section-title">Tickets</span>
-            <div class="section" style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap">
-              ${priorities.map(p =>
-            `<span class="badge rounded-pill ${colors[p]}">${stats[p]}</span>`
-          ).join("")}
-            </div>
-          </div>
-          `;
-
-          col.querySelector(".fa-pencil").addEventListener("click", () => {
-            window.currentEditingUserId = user.userId;
-            loadPage("editUser");
-          });
-
-
-          col.querySelector(".fa-user-minus").addEventListener("click", () => {
-            const deleteMsg = `Are you sure you want to delete user ${user.fullName}?\n(All assigned tickets will become unassigned.)`;
-            if (confirm(deleteMsg) === true) {
-              axios.delete(`/api/users/${user.userId}`)
-                .then(() => {
-                  alert(`User ${user.fullName} has been deleted from user profiles, and their tickets are now unassigned.`);
-                  fetchUsers();
-                }).catch(error => {
-                  console.log("Error deleting user.", error);
-                  alert("Failed to delete user.");
-                })
-            }
-          });
-
-          container.appendChild(col);
-        });
-
+        const userStats = calculateUserStats();
+        users.forEach(user => renderUserCard(user, userStats[user.fullName] ?? defaultStats()));
         pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages}`;
         prevBtn.disabled = currentPage === 0;
         nextBtn.disabled = currentPage + 1 >= totalPages;
-
-        const createUserBtn = document.getElementById("create-ticket-btn");
-        if (createUserBtn) {
-          createUserBtn.addEventListener("click", () => {
-            loadPage("createUser");
-          });
-        }
       })
-      .catch(err => console.error("Error fetching users:", err));
+      .catch(error => console.error("Error fetching users:", error));
   }
 
-  sortBySelect.addEventListener("change", e => { currentSortBy = e.target.value; currentPage = 0; fetchUsers(); });
-  orderBtn.addEventListener("click", () => { currentOrder = currentOrder === "asc" ? "desc" : "asc"; orderBtn.textContent = currentOrder.toUpperCase(); currentPage = 0; fetchUsers(); });
-  prevBtn.addEventListener("click", () => { if (currentPage > 0) { currentPage--; fetchUsers(); } });
-  nextBtn.addEventListener("click", () => { if (currentPage + 1 < totalPages) { currentPage++; fetchUsers(); } });
+  sortBySelect?.addEventListener("change", e => {
+    currentSortBy = e.target.value;
+    currentPage = 0;
+    fetchUsers();
+  });
 
+  orderBtn?.addEventListener("click", () => {
+    currentOrder = currentOrder === "asc" ? "desc" : "asc";
+    orderBtn.textContent = currentOrder.toUpperCase();
+    currentPage = 0;
+    fetchUsers();
+  });
 
+  prevBtn?.addEventListener("click", () => {
+    if (currentPage > 0) {
+      currentPage--;
+      fetchUsers();
+    }
+  });
+
+  nextBtn?.addEventListener("click", () => {
+    if (currentPage + 1 < totalPages) {
+      currentPage++;
+      fetchUsers();
+    }
+  });
+
+  createUserBtn?.addEventListener("click", () => loadPage("createUser"));
 }
+
 
 function initEditUserPage() {
   const userId = window.currentEditingUserId;
@@ -404,7 +425,7 @@ function initEditUserPage() {
       emailInput.value = user.email;
       positionInput.value = user.position;
     })
-    .catch(err => console.error("Failed to load user data.", err));
+    .catch(error => console.error("Failed to load user data.", error));
 
   const editForm = document.getElementById("editUserForm");
   if (editForm) {
@@ -428,16 +449,14 @@ function initEditUserPage() {
 
       const updatedUser = { userId, fullName, email, position };
 
-      axios.put(`/api/users/${userId}`, updatedUser, {
-        headers: { "Content-Type": "application/json" }
-      })
+      axios.put(`/api/users/${userId}`, updatedUser)
         .then(() => {
           alert("User updated successfully.");
           loadPage("users");
         })
-        .catch(err => {
+        .catch(error => {
           alert("Failed to update user.");
-          console.error(err);
+          console.error(error);
         });
     });
   }
@@ -449,8 +468,6 @@ function initEditUserPage() {
     });
   }
 }
-
-
 
 function initCreateUserPage() {
   const fullNameInput = document.getElementById("fullName");
@@ -484,10 +501,216 @@ function initCreateUserPage() {
           alert("User created successfully.");
           loadPage("users");
         })
-        .catch(err => {
+        .catch(error => {
           alert("Failed to create user.");
-          console.error(err);
+          console.error(error);
         });
+    });
+
+    const cancelBtn = document.getElementById("cancelBtn");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", () => {
+        loadPage("users");
+      });
+    }
+  }
+}
+
+function initTicketsPage() {
+  const container = document.getElementById("user-cards");
+  const sortBySelect = document.getElementById("sortBy");
+  const orderBtn = document.getElementById("orderBtn");
+  const prevBtn = document.getElementById("prevPage");
+  const nextBtn = document.getElementById("nextPage");
+  const pageInfo = document.getElementById("pageInfo");
+  const createTicketBtn = document.getElementById("create-ticket-btn");
+
+  let currentSortBy = "priority";
+  let currentOrder = "asc";
+  let currentPage = 0;
+  const pageSize = 6;
+  let totalPages = 1;
+
+  const colors = { CRITICAL: "critical", HIGH: "high", MEDIUM: "medium", LOW: "low" };
+
+  function renderTicketCard(ticket) {
+    const card = document.createElement("div");
+    card.classList.add("col-md-4");
+
+    const assignedTo = ticket.assignedTo?.fullName;
+    const priorityClass = colors[ticket.priority];
+
+    card.innerHTML = `
+      <div class="card border-0 rounded-5 ${priorityClass}">
+        <h2></h2>
+        <div class="d-flex justify-content-center align-items-center flex-column position-relative" style="color: #557089ff;">
+          <h5 class="text-center" style="max-width:240px;">${ticket.title}</h5>
+          <div class="d-flex gap-3 justify-content-center mb-2">
+            <p><strong>⬤ ${ticket.priority}</strong></p>
+            <p><strong style="color: rgba(136, 158, 178, 1);">⬤ ${ticket.type}</strong></p>
+          </div>
+
+          <i class="fa-solid fa-pencil position-absolute" style="top: 0; right: 0; transform: translateY(30%); cursor: pointer; color: #7a96b1ff" title="Edit"></i>
+          <i class="fa-solid fa-trash position-absolute" style="top: 0; left: 0; transform: translateY(30%); cursor: pointer; color: #7a96b1ff" title="Delete"></i>
+        </div>
+
+        <div class="mt-auto">
+          <p style="color: #7a96b1ff">Created at: ${ticket.createdAt} | Deadline: ${ticket.deadline}</p>
+          <span class="section-title">Assigned To</span>
+          <div class="section">
+            <p style="margin-bottom: 0px; color: #748ba1ff">${ticket.assignedTo.fullName || "Unassigned."}</p>
+          </div>
+
+          <span class="section-title">Description</span>
+          <div class="section">
+            <p style="margin-bottom: 0px; color: #748ba1ff">${ticket.description || "No description provided."}</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    card.querySelector(".fa-pencil").addEventListener("click", () => {
+      window.currentEditingTicketId = ticket.ticketId;
+      loadPage("editTicket");
+    });
+
+    card.querySelector(".fa-trash").addEventListener("click", () => {
+      if (confirm(`Delete ticket "${ticket.title}"?`)) {
+        axios.delete(`/api/tickets/${ticket.ticketId}`)
+          .then(() => {
+            alert(`Ticket "${ticket.title}" deleted.`);
+            fetchTickets();
+          })
+          .catch(() => alert("Failed to delete ticket."));
+      }
+    });
+
+    container.appendChild(card);
+  }
+
+  function fetchTickets() {
+    axios.get("/api/tickets", {
+      params: {
+        page: currentPage,
+        size: pageSize,
+        sortBy: currentSortBy,
+        order: currentOrder
+      }
+    })
+      .then(response => {
+        const tickets = response.data.content;
+        totalPages = response.data.totalPages;
+        container.innerHTML = "";
+        tickets.forEach(ticket => renderTicketCard(ticket));
+        pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 0;
+        nextBtn.disabled = currentPage + 1 >= totalPages;
+      })
+      .catch(error => console.error("Error fetching tickets:", error));
+  }
+
+  sortBySelect?.addEventListener("change", e => {
+    currentSortBy = e.target.value;
+    currentPage = 0;
+    fetchTickets();
+  });
+
+  orderBtn?.addEventListener("click", () => {
+    currentOrder = currentOrder === "asc" ? "desc" : "asc";
+    orderBtn.textContent = currentOrder.toUpperCase();
+    currentPage = 0;
+    fetchTickets();
+  });
+
+  prevBtn?.addEventListener("click", () => {
+    if (currentPage > 0) {
+      currentPage--;
+      fetchTickets();
+    }
+  });
+
+  nextBtn?.addEventListener("click", () => {
+    if (currentPage + 1 < totalPages) {
+      currentPage++;
+      fetchTickets();
+    }
+  });
+
+  createTicketBtn?.addEventListener("click", () => {
+    loadPage("createTicket");
+  });
+
+  fetchTickets();
+}
+
+function initEditTicketPage() {
+  const ticketId = window.currentEditingTicketId;
+  if (!ticketId) return;
+
+  const titleInput = document.getElementById("ticketTitle");
+  const descriptionInput = document.getElementById("description");
+  const typeSelect = document.getElementById("type");
+  const statusRadios = document.querySelectorAll('input[name="status"]');
+  const deadlineInput = document.getElementById("deadline");
+  const editForm = document.getElementById("editTicketForm");
+  const cancelBtn = document.getElementById("cancelBtn");
+
+  let originalCreatedAt = "";
+  let assignedUserId = "";
+  axios.get(`/api/tickets/${ticketId}`)
+    .then(response => {
+      const ticket = response.data;
+
+      originalCreatedAt = ticket.createdAt;
+      titleInput.value = ticket.title || "";
+      descriptionInput.value = ticket.description || "";
+      typeSelect.value = ticket.type || "OTHER";
+      deadlineInput.value = ticket.deadline ? ticket.deadline.slice(0, 10) : "";
+      assignedUserId = ticket.assignedTo.userId;
+
+      statusRadios.forEach(radio => {
+        radio.checked = radio.value === ticket.status;
+      });
+    })
+    .catch(error => {
+      console.error("Failed to load ticket data.", error);
+      alert("Could not load ticket details.");
+    });
+
+  if (editForm) {
+    editForm.addEventListener("submit", e => {
+      e.preventDefault();
+
+      const title = titleInput.value.trim();
+      const description = descriptionInput.value.trim();
+      const type = typeSelect.value;
+      const status = document.querySelector('input[name="status"]:checked')?.value;
+      const deadline = deadlineInput.value;
+
+      if (!title || !description || !type || !status || !deadline) {
+        alert("All fields are required.");
+        return;
+      }
+
+      const updatedTicket = { ticketId, title, description, type, status, deadline, createdAt: originalCreatedAt, assignedTo: assignedUserId};
+      console.log("Sending ticket update:", JSON.stringify(updatedTicket, null, 2));
+
+      axios.put(`/api/tickets/${ticketId}`, updatedTicket)
+        .then(() => {
+          alert("Ticket updated successfully.");
+          loadPage("tickets");
+        })
+        .catch(error => {
+          console.error("Failed to update ticket:", error.response?.data || error.message);
+          alert("Failed to update ticket.");
+        });
+
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      loadPage("tickets");
     });
   }
 }

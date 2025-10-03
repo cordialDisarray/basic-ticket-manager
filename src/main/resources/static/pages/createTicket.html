@@ -1,0 +1,51 @@
+<div class="d-flex justify-content-center">
+    <div class="card border-0 rounded-4" id="edit-user">
+        <h2>Create User</h2>
+        <form id="createTicketForm">
+
+            <span class="section-title">Title</span>
+            <div class="section">
+                <input type="text" name="ticketTitle" id="ticketTitle" required class="input-blend">
+            </div>
+
+            <div class="btn-group" role="group" aria-label="Priority">
+                <input type="radio" class="btn-check" name="priority" id="critical" value="CRITICAL" autocomplete="off">
+                <label class="btn btn-outline-danger" for="critical">Critical</label>
+
+                <input type="radio" class="btn-check" name="priority" id="high" value="HIGH" autocomplete="off">
+                <label class="btn btn-outline-warning" for="high">High</label>
+
+                <input type="radio" class="btn-check" name="priority" id="medium" value="MEDIUM" autocomplete="off">
+                <label class="btn btn-outline-info" for="medium">Medium</label>
+
+                <input type="radio" class="btn-check" name="priority" id="low" value="LOW" autocomplete="off">
+                <label class="btn btn-outline-success" for="low">Low</label>
+            </div>
+
+
+            <span class="section-title">Type</span>
+            <div class="section ">
+                <select name="type" id="type" class="w-100 select-blend" required>
+                    <option value="IMPROVEMENT">Improvement</option>
+                    <option value="REFACTOR">Refactor</option>
+                    <option value="FEATURE">Feature</option>
+                    <option value="BUG">Bug</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+
+            <span class="section-title">Deadline</span>
+            <div class="section">
+                <input type="date" name="deadline" id="deadline" class="input-blend">
+            </div>
+
+            <span class="section-title">Description</span>
+            <div class="section">
+                <input type="text" name="description" id="description" required class="input-blend">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+            <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+        </form>
+    </div>
+</div>
