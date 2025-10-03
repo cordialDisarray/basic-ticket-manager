@@ -1,0 +1,29 @@
+<div class="sorting d-flex align-items-center justify-content-center">
+  <div id="outer-sort">
+    <div id="inner-sort">
+      <div class="d-flex">
+        <label for="sortBy" class="me-2">Sort by:</label>
+        <select id="sortBy" class="form-select w-auto me-2">
+          <option value="fullName">Name</option>
+          <option value="email">Email</option>
+          <option value="position">Position</option>
+        </select>
+        <button id="orderBtn" class="btn btn-outline-secondary me-3">ASC</button>
+      </div>
+
+      <div>
+        <button id="prevPage" class="btn btn-outline-primary me-2">Prev</button>
+        <span id="pageInfo" class="me-2">Page 1</span>
+        <button id="nextPage" class="btn btn-outline-primary">Next</button>
+      </div>
+    </div>
+
+  </div>
+
+  <button id="create-ticket-btn" class="btn btn-primary ms-3">
+    <i class="fa-solid fa-user-plus"></i>
+    <span>Create</span>
+  </button>
+</div>
+
+<div id="user-cards" class="justify-content-center row"></div>

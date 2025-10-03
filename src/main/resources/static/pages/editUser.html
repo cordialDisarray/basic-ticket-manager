@@ -1,0 +1,31 @@
+<div class="d-flex justify-content-center">
+    <div class="card border-0 rounded-4" id="edit-user">
+        <h2>Edit User</h2>
+        <form id="editUserForm">
+
+            <span class="section-title">Full Name</span>
+            <div class="section">
+                <input type="text" name="fullName" id="fullName" required class="input-blend">
+            </div>
+
+            <span class="section-title">Email</span>
+            <div class="section">
+                <input type="email" name="email" id="email" required class="input-blend">
+            </div>
+
+            <span class="section-title">Position</span>
+            <div class="section ">
+                <select name="position" id="position" class="w-100 select-blend" required>
+                    <option value="JUNIOR">Junior</option>
+                    <option value="MID">Mid</option>
+                    <option value="SENIOR">Senior</option>
+                    <option value="TEAM_LEAD">Team Lead</option>
+                </select>
+            </div>
+
+
+            <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+            <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+        </form>
+    </div>
+</div>
