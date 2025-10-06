@@ -552,36 +552,19 @@ select option {
 }
 
 
-.critical h2 {
-    background: #B286D0;
-}
-
-.high h2 {
-    background: #FF89AE;
-}
-
-.medium h2 {
-    background: #fbb699;
-}
-
-.low h2 {
-    background: #72c9a9;
-}
-
-
-.card.critical p strong {
+.CRITICAL {
     color: #B286D0;
 }
 
-.card.high p strong {
+.HIGH {
     color: #FF89AE;
 }
 
-.card.medium p strong {
+.MEDIUM {
     color: #fbb699;
 }
 
-.card.low p strong {
+.LOW {
     color: #72c9a9;
 }
 
@@ -608,7 +591,7 @@ select option {
     color: white;
 }
 
-#medium:checked+label[for="medium"] {
+#REVIEW:checked+label[for="REVIEW"] {
     background-color: #f3d196;
     color: white;
 }
@@ -620,5 +603,51 @@ select option {
 
 #CANCELLED:checked+label[for="CANCELLED"] {
     background-color: #939aa0;
+    color: white;
+}
+
+
+.TO_DO h2 {
+    background-color: #749BCF;
+}
+
+.IN_PROGRESS h2 {
+    background-color: #4FC1CD;
+}
+
+.REVIEW h2 {
+    background-color: #f9d9a1;
+}
+
+.DONE h2 {
+    background-color: #9e84d6;
+}
+
+.BLOCKED h2 {
+    background-color: #f4A8BD;
+}
+
+.CANCELLED h2 {
+    background-color: #939aa0;
+}
+
+
+#LOW:checked+label[for="LOW"] {
+    background-color: #72c9a9;
+    color: white;
+}
+
+#MEDIUM:checked+label[for="MEDIUM"] {
+    background-color: #fbb699;
+    color: white;
+}
+
+#HIGH:checked+label[for="HIGH"] {
+    background-color: #FF89AE;
+    color: white;
+}
+
+#CRITICAL:checked+label[for="CRITICAL"] {
+    background-color: #B286D0;
     color: white;
 }

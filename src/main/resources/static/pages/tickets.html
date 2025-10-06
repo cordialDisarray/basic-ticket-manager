@@ -1,12 +1,15 @@
-<div class="sorting d-flex align-items-center justify-content-center">
+<div class="sorting d-flex align-items-center justify-content-center mb-4 mt-2">
   <div id="outer-sort">
     <div id="inner-sort">
       <div class="d-flex">
-        <label for="sortBy" class="me-2">Sort by:</label>
-        <select id="sortBy" class="form-select w-auto me-2">
-          <option value="priority">Priority</option>
+        <label for="ticketSortBy" class="me-2">Sort by:</label>
+        <select id="ticketSortBy" class="form-select w-auto me-2">
           <option value="status">Status</option>
+          <option value="priority">Priority</option>
           <option value="type">Type</option>
+          <option value="createdAt">Created at</option>
+          <option value="deadline">Deadline</option>
+          <option value="assignedTo">Assigned to</option>
         </select>
         <button id="orderBtn" class="btn btn-outline-secondary me-3">ASC</button>
       </div>

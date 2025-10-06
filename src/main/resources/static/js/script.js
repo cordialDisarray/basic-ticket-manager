@@ -20,9 +20,11 @@ function loadPage(pageName) {
 
       const titleMap = {
         users: "Users",
-        createUser: "Create User",
-        editUser: "Edit User",
+        createUser: "Users",
+        editUser: "Users",
         tickets: "Tickets",
+        createTicket: "Tickets",
+        editTicket: "Tickets",
         home: "Dashboard"
       }
 
@@ -70,11 +72,15 @@ if (path) {
 function initHomePage() {
 
   const assignBtn = document.getElementById("assign-ticket-btn");
-  if (assignBtn) {
-    assignBtn.addEventListener("click", () => {
-      loadPage("tickets")
-    })
-  }
+  const createBtn = document.getElementById("create-ticket-btn")
+
+  assignBtn?.addEventListener("click", () => {
+    loadPage("tickets");
+  })
+
+  createBtn?.addEventListener("click", () => {
+    loadPage("createTicket");
+  })
 
   axios.get('/api/tickets/count/priority')
     .then(response => {
@@ -518,36 +524,32 @@ function initCreateUserPage() {
 
 function initTicketsPage() {
   const container = document.getElementById("user-cards");
-  const sortBySelect = document.getElementById("sortBy");
+  const sortBySelect = document.getElementById("ticketSortBy");
   const orderBtn = document.getElementById("orderBtn");
   const prevBtn = document.getElementById("prevPage");
   const nextBtn = document.getElementById("nextPage");
   const pageInfo = document.getElementById("pageInfo");
   const createTicketBtn = document.getElementById("create-ticket-btn");
 
-  let currentSortBy = "priority";
+  let currentSortBy = "status";
   let currentOrder = "asc";
   let currentPage = 0;
   const pageSize = 6;
   let totalPages = 1;
 
-  const colors = { CRITICAL: "critical", HIGH: "high", MEDIUM: "medium", LOW: "low" };
-
   function renderTicketCard(ticket) {
     const card = document.createElement("div");
     card.classList.add("col-md-4");
 
-    const assignedTo = ticket.assignedTo?.fullName;
-    const priorityClass = colors[ticket.priority];
-
     card.innerHTML = `
-      <div class="card border-0 rounded-5 ${priorityClass}">
-        <h2></h2>
+      <div class="card border-0 rounded-5 ${ticket.status}">
+        <h2>${ticket.status.toLowerCase().split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</h2>
         <div class="d-flex justify-content-center align-items-center flex-column position-relative" style="color: #557089ff;">
           <h5 class="text-center" style="max-width:240px;">${ticket.title}</h5>
+
           <div class="d-flex gap-3 justify-content-center mb-2">
-            <p><strong>⬤ ${ticket.priority}</strong></p>
-            <p><strong style="color: rgba(136, 158, 178, 1);">⬤ ${ticket.type}</strong></p>
+            <p><strong class="${ticket.priority}">⬤ ${ticket.priority}</strong></p>
+            <p><strong style="color: rgba(158, 186, 215, 1);">⬤ ${ticket.type}</strong></p>
           </div>
 
           <i class="fa-solid fa-pencil position-absolute" style="top: 0; right: 0; transform: translateY(30%); cursor: pointer; color: #7a96b1ff" title="Edit"></i>
@@ -558,13 +560,9 @@ function initTicketsPage() {
           <p style="color: #7a96b1ff">Created at: ${ticket.createdAt} | Deadline: ${ticket.deadline}</p>
           <span class="section-title">Assigned To</span>
           <div class="section">
-            <p style="margin-bottom: 0px; color: #748ba1ff">${ticket.assignedTo.fullName || "Unassigned."}</p>
+            <p style="margin-bottom: 0px; color: #748ba1ff">${ticket.assignedTo?.fullName || "Unassigned"}</p>
           </div>
 
-          <span class="section-title">Description</span>
-          <div class="section">
-            <p style="margin-bottom: 0px; color: #748ba1ff">${ticket.description || "No description provided."}</p>
-          </div>
         </div>
       </div>
     `;
@@ -589,6 +587,14 @@ function initTicketsPage() {
   }
 
   function fetchTickets() {
+
+    console.log("Fetching tickets with:", {
+      page: currentPage,
+      size: pageSize,
+      sortBy: currentSortBy,
+      order: currentOrder
+    });
+
     axios.get("/api/tickets", {
       params: {
         page: currentPage,
@@ -596,16 +602,15 @@ function initTicketsPage() {
         sortBy: currentSortBy,
         order: currentOrder
       }
+    }).then(response => {
+      const tickets = response.data.content;
+      totalPages = response.data.totalPages;
+      container.innerHTML = "";
+      tickets.forEach(ticket => renderTicketCard(ticket));
+      pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages}`;
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = currentPage + 1 >= totalPages;
     })
-      .then(response => {
-        const tickets = response.data.content;
-        totalPages = response.data.totalPages;
-        container.innerHTML = "";
-        tickets.forEach(ticket => renderTicketCard(ticket));
-        pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages}`;
-        prevBtn.disabled = currentPage === 0;
-        nextBtn.disabled = currentPage + 1 >= totalPages;
-      })
       .catch(error => console.error("Error fetching tickets:", error));
   }
 
@@ -648,69 +653,153 @@ function initEditTicketPage() {
   if (!ticketId) return;
 
   const titleInput = document.getElementById("ticketTitle");
-  const descriptionInput = document.getElementById("description");
   const typeSelect = document.getElementById("type");
-  const statusRadios = document.querySelectorAll('input[name="status"]');
   const deadlineInput = document.getElementById("deadline");
   const editForm = document.getElementById("editTicketForm");
   const cancelBtn = document.getElementById("cancelBtn");
+  const assignedTo = document.getElementById("assignedToSelect");
 
-  let originalCreatedAt = "";
-  let assignedUserId = "";
+  axios.get("/api/users", {
+    params: {
+      page: 0,
+      size: 50
+    }
+  }).then(response => {
+    const users = response.data.content;
+    users.forEach(user => {
+      const option = document.createElement("option");
+      option.value = user.userId;
+      option.textContent = user.fullName;
+      assignedTo.appendChild(option);
+    });
+  }).catch(error => { console.log("Failed to lload users:", error) });
+
   axios.get(`/api/tickets/${ticketId}`)
     .then(response => {
       const ticket = response.data;
 
-      originalCreatedAt = ticket.createdAt;
-      titleInput.value = ticket.title || "";
-      descriptionInput.value = ticket.description || "";
+      titleInput.value = ticket.title;
       typeSelect.value = ticket.type || "OTHER";
       deadlineInput.value = ticket.deadline ? ticket.deadline.slice(0, 10) : "";
-      assignedUserId = ticket.assignedTo.userId;
+      assignedTo.value = ticket.assignedTo?.userId || "";
 
-      statusRadios.forEach(radio => {
-        radio.checked = radio.value === ticket.status;
-      });
+      const priorityRadio = document.querySelector(`input[name="priority"][value="${ticket.priority}"]`);
+      if (priorityRadio) priorityRadio.checked = true;
+
+      const statusRadio = document.querySelector(`input[name="status"][value="${ticket.status}"]`);
+      if (statusRadio) statusRadio.checked = true;
     })
     .catch(error => {
       console.error("Failed to load ticket data.", error);
-      alert("Could not load ticket details.");
     });
 
-  if (editForm) {
-    editForm.addEventListener("submit", e => {
+  editForm?.addEventListener("submit", e => {
+    e.preventDefault();
+
+    const title = titleInput.value.trim();
+    const status = document.querySelector('input[name="status"]:checked')?.value;
+    const priority = document.querySelector('input[name="priority"]:checked')?.value;
+    const type = typeSelect.value;
+    const deadline = deadlineInput.value;
+    const selectedUserId = assignedTo.value;
+
+    if (!title || !status || !priority || !type || !deadline) {
+      alert("All fields are required.");
+      return;
+    }
+
+    const updatedTicket = {
+      title,
+      status,
+      priority,
+      type,
+      deadline,
+      assignedTo: selectedUserId ? { userId: parseInt(selectedUserId) } : null
+    };
+
+    axios.put(`/api/tickets/${ticketId}`, updatedTicket)
+      .then(() => {
+        alert("Ticket updated successfully.");
+        loadPage("tickets");
+      })
+      .catch(error => {
+        console.error("Failed to update ticket:", error);
+        alert("Failed to update ticket.");
+      });
+
+  });
+
+  cancelBtn?.addEventListener("click", () => {
+    loadPage("tickets");
+  });
+}
+
+function initCreateTicketPage() {
+  const titleInput = document.getElementById("ticketTitle");
+  const typeSelect = document.getElementById("type");
+  const deadlineInput = document.getElementById("deadline");
+  const assignedToSelect = document.getElementById("assignedToSelect");
+
+  const createForm = document.getElementById("createTicketForm");
+  const cancelBtn = document.getElementById("cancelBtn");
+
+  axios.get("/api/users", {
+    params: {
+      page: 0,
+      size: 1000
+    }
+  })
+    .then(response => {
+      const users = response.data.content;
+      users.forEach(user => {
+        const option = document.createElement("option");
+        option.value = user.userId;
+        option.textContent = user.fullName;
+        assignedToSelect.appendChild(option);
+      });
+    })
+    .catch(error => {
+      console.error("Failed to lload users:", error);
+    });
+
+  if (createForm) {
+    createForm.addEventListener("submit", e => {
       e.preventDefault();
 
       const title = titleInput.value.trim();
-      const description = descriptionInput.value.trim();
       const type = typeSelect.value;
       const status = document.querySelector('input[name="status"]:checked')?.value;
+      const priority = document.querySelector('input[name="priority"]:checked')?.value;
       const deadline = deadlineInput.value;
+      const selectedUserId = assignedToSelect.value;
 
-      if (!title || !description || !type || !status || !deadline) {
-        alert("All fields are required.");
+      if (!title || !type || !status || !priority || !deadline) {
+        alert("All fields except 'Assigned To' are required.");
         return;
       }
 
-      const updatedTicket = { ticketId, title, description, type, status, deadline, createdAt: originalCreatedAt, assignedTo: assignedUserId};
-      console.log("Sending ticket update:", JSON.stringify(updatedTicket, null, 2));
+      const newTicket = {
+        title,
+        type,
+        status,
+        priority,
+        deadline,
+        assignedTo: selectedUserId ? { userId: parseInt(selectedUserId) } : null
+      };
 
-      axios.put(`/api/tickets/${ticketId}`, updatedTicket)
+      axios.post("/api/tickets", newTicket)
         .then(() => {
-          alert("Ticket updated successfully.");
+          alert("Ticket created successfully.");
           loadPage("tickets");
         })
         .catch(error => {
-          console.error("Failed to update ticket:", error.response?.data || error.message);
-          alert("Failed to update ticket.");
+          console.error("Failed to create ticket:", error);
+          alert("Failed to create ticket.");
         });
-
     });
   }
 
-  if (cancelBtn) {
-    cancelBtn.addEventListener("click", () => {
-      loadPage("tickets");
-    });
-  }
+  cancelBtn?.addEventListener("click", () => {
+    loadPage("tickets");
+  });
 }

@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-center">
-    <div class="card border-0 rounded-4" id="edit-ticket">
+    <div class="card border-0 rounded-4">
         <h2>Edit Ticket</h2>
         <form id="editTicketForm">
 
@@ -19,8 +19,8 @@
                         autocomplete="off">
                     <label class="btn status-label" for="IN_PROGRESS">In Progress</label>
 
-                    <input type="radio" class="btn-check" name="status" id="medium" value="MEDIUM" autocomplete="off">
-                    <label class="btn status-label" for="medium">Review</label>
+                    <input type="radio" class="btn-check" name="status" id="REVIEW" value="REVIEW" autocomplete="off">
+                    <label class="btn status-label" for="REVIEW">Review</label>
 
                     <input type="radio" class="btn-check" name="status" id="BLOCKED" value="BLOCKED" autocomplete="off">
                     <label class="btn status-label" for="BLOCKED">Blocked</label>
@@ -28,6 +28,25 @@
                     <input type="radio" class="btn-check" name="status" id="CANCELLED" value="CANCELLED"
                         autocomplete="off">
                     <label class="btn status-label" for="CANCELLED">Cancelled</label>
+                </div>
+            </div>
+
+            <span class="section-title">Priority</span>
+            <div>
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="priority" id="LOW" value="LOW" autocomplete="off"
+                        checked>
+                    <label class="btn status-label" for="LOW">Low</label>
+
+                    <input type="radio" class="btn-check" name="priority" id="MEDIUM" value="MEDIUM" autocomplete="off">
+                    <label class="btn status-label" for="MEDIUM">Medium</label>
+
+                    <input type="radio" class="btn-check" name="priority" id="HIGH" value="HIGH" autocomplete="off">
+                    <label class="btn status-label" for="HIGH">High</label>
+
+                    <input type="radio" class="btn-check" name="priority" id="CRITICAL" value="CRITICAL"
+                        autocomplete="off">
+                    <label class="btn status-label" for="CRITICAL">Critical</label>
                 </div>
             </div>
 
@@ -42,14 +61,16 @@
                 </select>
             </div>
 
+            <span class="section-title">Assigned To</span>
+            <div class="section">
+                <select id="assignedToSelect" class="w-100 select-blend" size="2">
+                    <option value="">Unassigned</option>
+                </select>
+            </div>
+
             <span class="section-title">Deadline</span>
             <div class="section">
                 <input type="date" name="deadline" id="deadline" class="input-blend">
-            </div>
-
-            <span class="section-title">Description</span>
-            <div class="section">
-                <input type="text" name="description" id="description" required class="input-blend">
             </div>
 
             <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
